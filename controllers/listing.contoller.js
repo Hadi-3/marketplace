@@ -9,9 +9,21 @@ router.get('/new', (req, res) => {
 
 // POST FROM DATA TO DATABASE
 router.post('/' , async (req, res) => {
-    await listing.create(req.body)
-    console.log(req.body)
-    res.send('You submitted the form')
+    try {
+        await listing.create(req.body)
+        res.redirect('/listings')
+
+    } catch (error) {
+        console.log(error)
+        res.send('Somthing went wrong')
+    }
+})
+
+// VIEW THE INDEX PAGE
+router.get('/', async (req, res) => {
+    const foundListings = await listing.find()
+    console.log(foundListings)
+    res.render('listings/index.ejs', {foundListings: foundListings})
 })
 
 module.exports = router
