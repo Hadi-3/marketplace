@@ -22,3 +22,12 @@ li {
     text-align: center;
 
 }
+
+.actions {
+    display: flex;
+    flex-direction: column;
+}
+
+#edit-btn {
+    width: 30%;
+}
