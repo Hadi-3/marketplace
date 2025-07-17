@@ -1,29 +1,51 @@
 const express = require('express')
 const router = express.Router()
-const listing = require('../models/listing')
+const Listing = require('../models/listing')
+const isSignedIn = require('../middleware/is-signed-in')
+
 
 // VIEW NEW LISTING FORM
-router.get('/new', (req, res) => {
+router.get('/new', isSignedIn, (req, res) => {
     res.render('listings/new.ejs')
 })
 
-// POST FROM DATA TO DATABASE
-router.post('/' , async (req, res) => {
+// POST FORM DATA TO DATABASE
+router.post('/', isSignedIn, async (req, res) => {
     try {
-        await listing.create(req.body)
+        req.body.seller = req.session.user._id
+        await Listing.create(req.body)
         res.redirect('/listings')
-
     } catch (error) {
         console.log(error)
-        res.send('Somthing went wrong')
+        res.send('Something went wrong')
     }
 })
 
 // VIEW THE INDEX PAGE
 router.get('/', async (req, res) => {
-    const foundListings = await listing.find()
+    const foundListings = await Listing.find()
     console.log(foundListings)
-    res.render('listings/index.ejs', {foundListings: foundListings})
+    res.render('listings/index.ejs', { foundListings: foundListings })
+})
+
+// VIEW A SINGLE LISTING (SHOW PAGE)
+router.get('/:listingId', async (req, res) => {
+    const foundListing = await Listing.findById(req.params.listingId).populate('seller')
+    console.log(foundListing)
+    res.render('listings/show.ejs', { foundListing: foundListing })
+})
+
+// DELETE LISTING FROM DATABASE
+router.delete('/:listingId', async (req, res) => {
+    // find the listing
+  const foundListing = await Listing.findById(req.params.listingId).populate('seller')
+    // check if the logged in user owns the listing
+    if (foundListing.seller._id.equals(req.session.user._id)) {
+        // delete the listing and redirect
+        await foundListing.deleteOne()
+        res.redirect('/listings')
+    }
+    return res.send('Not authorized')
 })
 
 module.exports = router
