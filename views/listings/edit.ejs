@@ -7,7 +7,7 @@
     <title>Edit <%= foundListing.title %></title>
 </head>
 <body>
-    <h1>Edit the Listing</h1>
+    <h1>Edit <%= foundListing.title %></h1>
     <form action="/listings/<%=foundListing._id%>?_method=PUT" method="POST">
         <label for="title">Title:</label>
         <input type="text" name="title" id="title" value="<%= foundListing.title %>"/>
